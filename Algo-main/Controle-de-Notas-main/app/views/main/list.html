@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Usuários - Controle de Notas</title>
+    <!-- Pode adicionar aqui chamadas para CSS, se tiver algum -->
+</head>
+<body>
+    <h2>Usuários Cadastrados</h2>
+
+    <!-- Tabela para mostrar os dados -->
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome de Usuário</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- O loop for do Jinja2 repete a tag <tr> para cada objeto na lista -->
+            {% for usuario in usuarios %}
+                <tr>
+                    <td>{{ usuario.id }}</td>
+                    <td>{{ usuario.username }}</td>
+                    <td>
+                        <!-- O if do Jinja2 avalia o status booleano para dar cor -->
+                        {% if usuario.is_active %}
+                            <span style="color: green;">Ativo</span>
+                        {% else %}
+                            <span style="color: red;">Inativo</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            <!-- O else do for garante que a tabela não fica vazia se o banco não tiver ninguém -->
+            {% else %}
+                <tr>
+                    <td colspan="3">Nenhum usuário cadastrado até o momento.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <br>
+    <a href="{{ url_for('main.welcome') }}">Voltar ao Dashboard</a>
+</body>
+</html>
