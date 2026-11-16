@@ -1,13 +1,12 @@
 from flask import Blueprint, request, render_template, redirect, url_for, flash, session
 from app.models.trabalho_model import Trabalho
+from app.utils.auth_middleware import login_required
 
 trabalho_bp = Blueprint('trabalho', __name__)
 
 @trabalho_bp.route('/trabalhos/novo', methods=['GET', 'POST'])
+@login_required
 def cadastrar():
-    # Proteção: só acessa se estiver logado
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
 
     if request.method == 'POST':
         titulo = request.form.get('titulo')
@@ -37,12 +36,9 @@ def cadastrar():
     return render_template('main/trabalho_register.html')
 
 @trabalho_bp.route('/trabalhos', methods=['GET'])
+@login_required
 def listar():
-    # Proteção: só acessa se estiver logado
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
-
-    # Chama o método do modelo para buscar todos os trabalhos no banco
+   
     todos_trabalhos = Trabalho.listar_todos()
 
     # Renderiza o HTML passando a lista de objetos Trabalho
