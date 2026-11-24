@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - Controle de Notas{% endblock %}
+
+{% block container_style %}style="max-width: 440px;"{% endblock %}
+
+{% block header %}
+<div class="header-bar">
+    <h1>Entrar</h1>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST" action="{{ url_for('auth.login') }}">
+        <div class="form-group">
+            <label for="username">Usuário *</label>
+            <input type="text" id="username" name="username" value="{{ ultimo_usuario or '' }}" required autofocus>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Senha *</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" style="flex: 1;">Acessar Sistema</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
