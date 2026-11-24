@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Painel - Controle de Notas{% endblock %}
+
+{% block header %}
+<div class="header-bar">
+    <div>
+        <h1 style="margin-bottom: 0.2rem;">Painel de Controle</h1>
+        <small style="color: var(--text-muted);">
+            Logado como <strong>{{ session['username'] }}</strong> 
+            ({% if session['perfil'] == 'admin' %}Administrador{% elif session['perfil'] == 'professor' %}Professor{% else %}Aluno{% endif %})
+        </small>
+    </div>
+    <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Sair</a>
+</div>
+{% endblock %}
+
+{% block content %}
+    {% if alertas %}
+        <div style="margin-bottom: 1.5rem;">
+            {% for item in alertas %}
+                <div class="alert {{ 'alert-danger' if item.nivel == 'urgente' else 'alert-warning' }}" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                    <div>
+                        <strong>Atenção ao Prazo:</strong> 
+                        O trabalho <strong>"{{ item.trabalho.titulo }}"</strong> ({{ item.trabalho.materia }})
+                        {% if session['perfil'] in ('professor', 'admin') %}
+                            — Aluno: <strong>{{ item.trabalho.aluno_nome }}</strong>
+                        {% endif %}
+                        {% if item.dias == 0 %}
+                            vence <strong>hoje</strong>!
+                        {% elif item.dias == 1 %}
+                            vence <strong>amanhã (falta 1 dia)</strong>!
+                        {% else %}
+                            vence em <strong>{{ item.dias }} dias</strong> ({{ item.trabalho.data_limite }}).
+                        {% endif %}
+                    </div>
+                    <a href="{{ url_for('trabalho.listar') }}" class="btn btn-secondary btn-sm">Verificar</a>
+                    <a href="{{ url_for('materia.listar') }}" class="btn btn-secondary">Gerenciar Matérias</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">{{ 'Total Atribuídos' if session['perfil'] in ('professor', 'admin') else 'Meus Trabalhos' }}</div>
+            <div class="stat-value">{{ resumo.total }}</div>
+        </div>
+
+        <div class="stat-card warning">
+            <div class="stat-label">Pendentes</div>
+            <div class="stat-value">{{ resumo.pendentes }}</div>
+        </div>
+
+        <div class="stat-card success">
+            <div class="stat-label">Concluídos</div>
+            <div class="stat-value">{{ resumo.concluidos }}</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Ações Rápidas</h2>
+        {% if session['perfil'] == 'admin' %}
+            <p>Gerencie o corpo docente e acompanhe os usuários cadastrados no sistema:</p>
+            <div class="btn-group">
+                <a href="{{ url_for('auth.cadastrar_professor') }}" class="btn">+ Cadastrar Professor</a>
+                <a href="{{ url_for('main.listar_usuarios') }}" class="btn btn-secondary">Listar Professores e Alunos</a>
+            </div>
+        {% elif session['perfil'] == 'professor' %}
+            <p>Gerencie suas disciplinas, cadastre alunos e atribua trabalhos com prazos:</p>
+            <div class="btn-group">
+                <a href="{{ url_for('trabalho.listar') }}" class="btn">Gerenciar Trabalhos</a>
+                <a href="{{ url_for('trabalho.cadastrar') }}" class="btn btn-secondary">+ Novo Trabalho</a>
+                <a href="{{ url_for('materia.listar') }}" class="btn btn-secondary">Gerenciar Matérias</a>
+                <a href="{{ url_for('main.cadastrar_aluno') }}" class="btn btn-secondary">+ Cadastrar Aluno</a>
+            </div>
+        {% else %}
+            <p>Acompanhe seus prazos e envie suas atividades antes da data limite:</p>
+            <div class="btn-group">
+                <a href="{{ url_for('trabalho.listar') }}" class="btn">Ver Meus Trabalhos</a>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

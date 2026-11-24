@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Trabalho - Controle de Notas{% endblock %}
+
+{% block container_style %}style="max-width: 680px;"{% endblock %}
+
+{% block header %}
+<div class="header-bar">
+    <h1>Editar Trabalho</h1>
+    <a href="{{ url_for('trabalho.listar') }}" class="btn btn-secondary">Voltar à Lista</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST" action="{{ url_for('trabalho.editar', id=trabalho.id) }}">
+        <div class="form-group">
+            <label for="aluno_id">Aluno Destinatário *</label>
+            <select id="aluno_id" name="aluno_id" style="width: 100%; padding: 0.65rem 0.875rem; font-size: 0.95rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: #ffffff;" required>
+                {% for aluno in alunos %}
+                    <option value="{{ aluno.id }}" {% if aluno.id == trabalho.aluno_id %}selected{% endif %}>
+                        {{ aluno.username }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="titulo">Título do Trabalho *</label>
+            <input type="text" id="titulo" name="titulo" value="{{ trabalho.titulo }}" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="materia">Matéria *</label>
+                <select id="materia" name="materia" style="width: 100%; padding: 0.65rem 0.875rem; font-size: 0.95rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: #ffffff;" required>
+                    {% for m in materias %}
+                        {% set nome_completo = m.codigo ~ ' - ' ~ m.nome %}
+                        <option value="{{ nome_completo }}" {% if trabalho.materia == nome_completo %}selected{% endif %}>
+                            {{ nome_completo }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="data_limite">Data Limite *</label>
+                <input type="date" id="data_limite" name="data_limite" value="{{ trabalho.data_limite }}" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="status">Status</label>
+            <select id="status" name="status" style="width: 100%; padding: 0.65rem 0.875rem; font-size: 0.95rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: #ffffff;">
+                <option value="Pendente" {% if trabalho.status == 'Pendente' %}selected{% endif %}>Pendente</option>
+                <option value="Concluído" {% if trabalho.status == 'Concluído' %}selected{% endif %}>Concluído</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="descricao">Descrição</label>
+            <textarea id="descricao" name="descricao">{{ trabalho.descricao or '' }}</textarea>
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" style="flex: 1;">Salvar Alterações</button>
+            <a href="{{ url_for('trabalho.listar') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
