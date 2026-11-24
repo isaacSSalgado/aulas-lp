@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}Cadastrar Trabalho - Controle de Notas{% endblock %}
+
+{% block container_style %}style="max-width: 680px;"{% endblock %}
+
+{% block header %}
+<div class="header-bar">
+    <h1>Atribuir Novo Trabalho</h1>
+    <a href="{{ url_for('trabalho.listar') }}" class="btn btn-secondary">Ver Todos</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <form method="POST" action="{{ url_for('trabalho.cadastrar') }}">
+        <div class="form-group">
+            <label for="aluno_id">Aluno Destinatário *</label>
+            <select id="aluno_id" name="aluno_id" style="width: 100%; padding: 0.65rem 0.875rem; font-size: 0.95rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: #ffffff;" required>
+                <option value="" disabled selected>Selecione o aluno que receberá este trabalho...</option>
+                {% if alunos %}
+                    <option value="todos">Todos os Alunos ({{ alunos|length }})</option>
+                {% endif %}
+                {% for aluno in alunos %}
+                    <option value="{{ aluno.id }}">{{ aluno.username }}</option>
+                {% endfor %}
+            </select>
+            {% if not alunos %}
+                <small style="color: var(--danger); display: block; margin-top: 0.35rem;">
+                    Nenhum aluno cadastrado. <a href="{{ url_for('main.cadastrar_aluno') }}">Cadastre um aluno primeiro</a>.
+                </small>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="titulo">Título do Trabalho *</label>
+            <input type="text" id="titulo" name="titulo" placeholder="Ex: Lista de Exercícios 02" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="materia">Matéria / Disciplina *</label>
+                <select id="materia" name="materia" style="width: 100%; padding: 0.65rem 0.875rem; font-size: 0.95rem; border: 1px solid var(--border-color); border-radius: 8px; background-color: #ffffff;" required>
+                    <option value="" disabled selected>Selecione a matéria...</option>
+                    {% for m in materias %}
+                        <option value="{{ m.codigo }} - {{ m.nome }}">{{ m.codigo }} - {{ m.nome }}</option>
+                    {% endfor %}
+                </select>
+                {% if not materias %}
+                    <small style="color: var(--danger); display: block; margin-top: 0.35rem;">
+                        Nenhuma matéria cadastrada. <a href="{{ url_for('materia.listar') }}">Cadastre uma matéria primeiro</a>.
+                    </small>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="data_limite">Data de Entrega *</label>
+                <input type="date" id="data_limite" name="data_limite" min="{{ hoje }}" required>
+                
+                <div class="quick-dates">
+                    <button type="button" class="chip-btn" onclick="definirPrazo(1)">Amanhã</button>
+                    <button type="button" class="chip-btn" onclick="definirPrazo(3)">+3 dias</button>
+                    <button type="button" class="chip-btn" onclick="definirPrazo(7)">+7 dias</button>
+                    <button type="button" class="chip-btn" onclick="definirPrazo(15)">+15 dias</button>
+                </div>
+                <span id="feedback-prazo" class="date-feedback"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="descricao">Descrição / Instruções</label>
+            <textarea id="descricao" name="descricao" placeholder="Critérios de avaliação, formato de entrega..."></textarea>
+        </div>
+
+        <div class="btn-group">
+            <button type="submit" style="flex: 1;">Enviar Trabalho</button>
+            <a href="{{ url_for('main.welcome') }}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const inputData = document.getElementById('data_limite');
+    const feedback = document.getElementById('feedback-prazo');
+
+    function atualizarFeedback() {
+        if (!inputData.value) {
+            feedback.textContent = '';
+            return;
+        }
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+
+        const partes = inputData.value.split('-');
+        const escolhida = new Date(partes[0], partes[1] - 1, partes[2]);
+        const diffDias = Math.round((escolhida - hoje) / (1000 * 60 * 60 * 24));
+
+        if (diffDias === 0) {
+            feedback.textContent = 'Entrega marcada para hoje.';
+        } else if (diffDias === 1) {
+            feedback.textContent = 'Falta 1 dia para a entrega (alerta urgente).';
+        } else if (diffDias > 1) {
+            const diaSemana = escolhida.toLocaleDateString('pt-BR', { weekday: 'long' });
+            feedback.textContent = `Faltam ${diffDias} dias (${diaSemana}).`;
+        } else {
+            feedback.textContent = 'Atenção: data anterior a hoje.';
+        }
+    }
+
+    function definirPrazo(dias) {
+        const data = new Date();
+        data.setDate(data.getDate() + dias);
+        const ano = data.getFullYear();
+        const mes = String(data.getMonth() + 1).padStart(2, '0');
+        const dia = String(data.getDate()).padStart(2, '0');
+        inputData.value = `${ano}-${mes}-${dia}`;
+        atualizarFeedback();
+    }
+
+    inputData.addEventListener('change', atualizarFeedback);
+</script>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Painel - Controle de Notas{% endblock %}
+
+{% block header %}
+<div class="header-bar">
+    <div>
+        <h1>Painel de Controle</h1>
+        <p style="margin: 0; color: var(--text-muted); font-size: 0.9rem;">
+            Logado como <strong>{{ session['username'] }}</strong> ({{ session['perfil']|capitalize }})
+        </p>
+    </div>
+    <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">Sair</a>
+</div>
+{% endblock %}
+
+{% block content %}
+    {% if session['perfil'] != 'admin' and alerta_prazo %}
+    <div class="alert alert-warning" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem;">
+        <div>
+            <strong>Atenção ao Prazo:</strong> O trabalho "{{ alerta_prazo.titulo }}" ({{ alerta_prazo.materia }}) vence em <strong>{{ dias_restantes }} dia(s)</strong> ({{ alerta_prazo.data_limite }}).
+        </div>
+        <a href="{{ url_for('trabalho.listar') }}" class="btn btn-secondary btn-sm">Verificar</a>
+    </div>
+    {% endif %}
+
+    {% if session['perfil'] == 'admin' %}
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="card" style="margin-bottom: 0;">
+            <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Professores</span>
+            <h2 style="font-size: 2rem; margin: 0.35rem 0 0;">{{ total_professores or 0 }}</h2>
+        </div>
+        <div class="card" style="margin-bottom: 0;">
+            <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Alunos</span>
+            <h2 style="font-size: 2rem; margin: 0.35rem 0 0;">{{ total_alunos or 0 }}</h2>
+        </div>
+    </div>
+    {% else %}
+    <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="card" style="margin-bottom: 0;">
+            <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">
+                {% if session['perfil'] == 'professor' %}Total de Trabalhos{% else %}Meus Trabalhos{% endif %}
+            </span>
+            <h2 style="font-size: 2rem; margin: 0.35rem 0 0;">{{ total_trabalhos or 0 }}</h2>
+        </div>
+        <div class="card" style="margin-bottom: 0;">
+            <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Pendentes</span>
+            <h2 style="font-size: 2rem; margin: 0.35rem 0 0;">{{ pendentes or 0 }}</h2>
+        </div>
+        <div class="card" style="margin-bottom: 0;">
+            <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600;">Concluídos</span>
+            <h2 style="font-size: 2rem; margin: 0.35rem 0 0;">{{ concluidos or 0 }}</h2>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card">
+        <h2>Ações Rápidas</h2>
+        {% if session['perfil'] == 'admin' %}
+            <p>Gerencie o corpo docente e acompanhe os usuários cadastrados no sistema:</p>
+            <div class="btn-group">
+                <a href="{{ url_for('auth.cadastrar_professor') }}" class="btn">+ Cadastrar Professor</a>
+                <a href="{{ url_for('main.listar_usuarios') }}" class="btn btn-secondary">Listar Professores e Alunos</a>
+            </div>
+        {% elif session['perfil'] == 'professor' %}
+            <p>Gerencie suas disciplinas, cadastre alunos e atribua trabalhos com prazos:</p>
+            <div class="btn-group">
+                <a href="{{ url_for('trabalho.listar') }}" class="btn">Gerenciar Trabalhos</a>
+                <a href="{{ url_for('trabalho.cadastrar') }}" class="btn btn-secondary">+ Novo Trabalho</a>
+                <a href="{{ url_for('materia.listar') }}" class="btn btn-secondary">Gerenciar Matérias</a>
+                <a href="{{ url_for('main.cadastrar_aluno') }}" class="btn btn-secondary">+ Cadastrar Aluno</a>
+            </div>
+        {% else %}
+            <p>Acompanhe seus prazos e envie suas atividades antes da data limite:</p>
+            <div class="btn-group">
+                <a href="{{ url_for('trabalho.listar') }}" class="btn">Ver Meus Trabalhos</a>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
